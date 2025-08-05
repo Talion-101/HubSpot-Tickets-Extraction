@@ -120,6 +120,28 @@ The system will automatically detect and process your data format."
                         {% endif %}
                     </div>
                     
+                    <!-- Priority Statistics Section -->
+                    {% if priority_stats %}
+                    <div class="priority-stats-section">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-chart-pie me-2" style="color: #00f5ff; font-size: 1.2rem;"></i>
+                            <h5 class="mb-0" style="color: white; font-weight: 600;">Priority Breakdown</h5>
+                        </div>
+                        <div class="priority-stats-grid">
+                            {% for stat in priority_stats %}
+                            <div class="priority-stat-card">
+                                <div class="priority-badge" style="background: {{ stat.color }};">
+                                    {{ stat.count }}
+                                </div>
+                                <div class="priority-label" style="color: {{ stat.color }};">
+                                    {{ stat.name }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
                     <div class="table-responsive">
                         <table id="resultsTable" class="table mb-0">
                             <thead>

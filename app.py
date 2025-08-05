@@ -11,6 +11,49 @@ app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-product
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def calculate_priority_stats(data):
+    """Calculate ticket count statistics by priority"""
+    priority_counts = {}
+    
+    for ticket in data:
+        priority = ticket.get('PRIORITY', '').strip().lower()
+        
+        # Normalize priority names
+        if priority in ['urgent', 'critical']:
+            priority = 'urgent'
+        elif priority in ['high']:
+            priority = 'high'
+        elif priority in ['medium', 'med', 'normal']:
+            priority = 'medium'
+        elif priority in ['low']:
+            priority = 'low'
+        else:
+            priority = 'unknown'
+        
+        priority_counts[priority] = priority_counts.get(priority, 0) + 1
+    
+    # Define priority order and colors
+    priority_order = ['urgent', 'high', 'medium', 'low', 'unknown']
+    priority_colors = {
+        'urgent': '#dc2626',    # Really red
+        'high': '#ef4444',      # Red
+        'medium': '#f59e0b',    # Yellowish orange
+        'low': '#10b981',       # Green
+        'unknown': '#6b7280'    # Gray
+    }
+    
+    # Create ordered list with colors
+    stats = []
+    for priority in priority_order:
+        if priority in priority_counts:
+            stats.append({
+                'name': priority.capitalize(),
+                'count': priority_counts[priority],
+                'color': priority_colors[priority]
+            })
+    
+    return stats
+
 @app.route('/')
 def index():
     """Display the main form for pasting ticket data"""
@@ -38,10 +81,14 @@ def parse_tickets():
             flash('No valid ticket data found.', 'error')
             return redirect(url_for('index'))
         
+        # Calculate priority statistics
+        priority_stats = calculate_priority_stats(parsed_data)
+        
         # Store parsed data in session for download
         session['parsed_data'] = parsed_data
         
-        return render_template('index.html', data=parsed_data, show_download=True)
+        return render_template('index.html', data=parsed_data, priority_stats=priority_stats, show_download=True)
+        
         
     except Exception as e:
         flash(f'An error occurred: {str(e)}', 'error')
