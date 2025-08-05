@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HubSpot Ticket Parser</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row justify-content-center min-vh-100 align-items-start py-5">
+            <div class="col-12 col-lg-10 col-xl-8">
+                
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <h1 class="display-4 mb-3">
+                        <i class="fas fa-ticket-alt me-3"></i>
+                        HubSpot Ticket Parser
+                    </h1>
+                    <p class="lead text-muted">
+                        Parse raw HubSpot ticket data into a structured table and export to Excel
+                    </p>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' }} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Input Form -->
+                <div class="card glass-card mb-5">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-paste me-2"></i>
+                            Paste Ticket Data
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('parse_tickets') }}">
+                            <div class="mb-4">
+                                <label for="ticket_data" class="form-label">
+                                    Raw Ticket Data (8 fields per line, separated by | or tab)
+                                </label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="ticket_data" 
+                                    name="ticket_data" 
+                                    rows="10" 
+                                    placeholder="Example:
+Login Issue | john.doe@example.com | Open | 2025-08-01 | 2025-08-04 | 2025-08-03 | High | Alice
+Payment Failure | jane.smith@example.com | In Progress | 2025-07-29 | 2025-08-02 | 2025-08-01 | Medium | Bob"
+                                    required
+                                ></textarea>
+                                <div class="form-text">
+                                    Expected format: TICKET NAME | CONTACTS | STATUS | CREATE DATE | LAST ACTIVITY | LAST REPLY | PRIORITY | OWNER
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-3">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-cogs me-2"></i>
+                                    Generate Table
+                                </button>
+                                
+                                {% if data %}
+                                    <a href="{{ url_for('clear_data') }}" class="btn btn-outline-secondary btn-lg">
+                                        <i class="fas fa-trash me-2"></i>
+                                        Clear Data
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
+                {% if data %}
+                <div class="card glass-card fade-in">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-table me-2"></i>
+                            Parsed Tickets ({{ data|length }} records)
+                        </h3>
+                        
+                        {% if show_download %}
+                        <a href="{{ url_for('download_excel') }}" class="btn btn-success">
+                            <i class="fas fa-download me-2"></i>
+                            Download Excel
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-striped table-hover mb-0">
+                                <thead class="table-primary">
+                                    <tr>
+                                        {% for header in data[0].keys() %}
+                                        <th scope="col" class="text-nowrap">{{ header }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ticket in data %}
+                                    <tr>
+                                        {% for value in ticket.values() %}
+                                        <td>{{ value }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Instructions -->
+                {% if not data %}
+                <div class="card glass-card mt-5">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            How to Use
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-clipboard-list me-2"></i>Input Format</h5>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>One ticket per line</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>8 fields separated by | or tab</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>No headers needed</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Empty lines are ignored</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-download me-2"></i>Output Options</h5>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>View as HTML table</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Download as Excel (.xlsx)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Styled and formatted</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>All processing in memory</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Footer -->
+                <div class="text-center mt-5 text-muted">
+                    <small>
+                        <i class="fas fa-shield-alt me-1"></i>
+                        No data is stored on the server. All processing happens in memory.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript for enhanced UX -->
+    <script>
+        // Auto-resize textarea
+        const textarea = document.getElementById('ticket_data');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.max(200, this.scrollHeight) + 'px';
+            });
+        }
+
+        // Add loading state to form submission
+        document.querySelector('form').addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            submitBtn.disabled = true;
+        });
+
+        // Smooth scroll to results
+        {% if data %}
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultsCard = document.querySelector('.fade-in');
+            if (resultsCard) {
+                resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
