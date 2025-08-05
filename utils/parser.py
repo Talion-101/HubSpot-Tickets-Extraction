@@ -7,8 +7,8 @@ import re
 
 # Fixed headers for HubSpot tickets
 HEADERS = [
-    'TICKET ID',
     'TICKET NAME',
+    'TICKET ID',
     'TICKET - CONTACTS', 
     'TICKET STATUS',
     'CREATE DATE',
@@ -84,7 +84,7 @@ def validate_ticket_data(data):
         return errors
     
     # Check for required fields
-    required_fields = ['TICKET ID', 'TICKET NAME', 'TICKET STATUS']
+    required_fields = ['TICKET NAME', 'TICKET ID', 'TICKET STATUS']
     
     for i, ticket in enumerate(data, 1):
         for field in required_fields:
