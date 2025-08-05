@@ -13,19 +13,59 @@ A Flask web application that parses raw HubSpot ticket data into structured tabl
 
 ## Input Format
 
-The app expects raw ticket data with exactly 9 fields per line:
+The app supports two input formats:
+
+### Format 1: New HubSpot Format (Recommended)
+The current HubSpot copy-paste format where each field is on a separate line. The system automatically detects and ignores "Preview" lines and handles blank lines gracefully.
+
+**Example:**
+```
+Cancellation of Steven Fricano's DNA Web App account
+
+Preview
+27333837927
+Leon Morales
+New (Support Pipeline)
+Aug 1, 2025 10:14 PM GMT+5:30
+Aug 1, 2025 10:48 PM GMT+5:30
+Aug 1, 2025 10:14 PM GMT+5:30
+Urgent
+Isuru Promodh (isuru.promodh@dnabehavior.com)
+```
+
+**Field Order:**
+1. Ticket Name
+2. [Blank line] (automatically ignored if present)
+3. Preview (automatically ignored if present)
+4. Ticket ID
+5. Ticket Contacts
+6. Ticket Status
+7. Create Date
+8. Last Activity Date
+9. Last Customer Reply Date
+10. Priority
+11. Ticket Owner
+
+**Features:**
+- ✅ Handles blank lines after ticket name
+- ✅ Automatically skips "Preview" lines
+- ✅ Supports multiple tickets in one paste
+- ✅ Flexible formatting with extra whitespace
+
+### Format 2: Legacy Delimited Format
+For backward compatibility, the app also supports pipe or tab delimited data with exactly 9 fields per line:
 
 ```
 TICKET NAME | TICKET ID | TICKET - CONTACTS | TICKET STATUS | CREATE DATE | LAST ACTIVITY DATE | LAST CUSTOMER REPLY DATE | PRIORITY | TICKET OWNER
 ```
 
-### Example Input:
+**Example:**
 ```
 Login Issue | TK-001 | john.doe@example.com | Open | 2025-08-01 | 2025-08-04 | 2025-08-03 | High | Alice
 Payment Failure | TK-002 | jane.smith@example.com | In Progress | 2025-07-29 | 2025-08-02 | 2025-08-01 | Medium | Bob
 ```
 
-### Supported Delimiters:
+**Supported Delimiters:**
 - Pipe (`|`) 
 - Tab (`\t`)
 
