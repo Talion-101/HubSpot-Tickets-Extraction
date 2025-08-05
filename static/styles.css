@@ -298,7 +298,139 @@ th {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    font-weight: 700;
+}
+
+/* Enhanced Table Styles for Better Readability */
+.table {
+    font-size: 0.95rem;
+}
+
+.table th, 
+.table td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    border-color: var(--border-color);
+    word-wrap: break-word;
+    max-width: 200px;
+}
+
+.table thead th {
+    background: rgba(13, 110, 253, 0.9) !important;
+    color: white !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--primary-color);
+    white-space: nowrap;
+}
+
+.table tbody td {
+    background: rgba(33, 38, 45, 0.7) !important;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.table-hover > tbody > tr:hover > td {
+    background: rgba(13, 110, 253, 0.1) !important;
+    transform: scale(1.005);
+    transition: all 0.2s ease;
+}
+
+/* Make table full width and responsive */
+.table-responsive {
+    border-radius: 0 0 16px 16px;
+    max-height: none;
+    overflow-x: auto;
+}
+
+#resultsTable {
+    width: 100%;
+    table-layout: auto;
+    min-width: 1200px; /* Ensure minimum width for readability */
+}
+
+/* Specific column styling for better readability */
+.table td:first-child, /* TICKET NAME */
+.table th:first-child {
+    min-width: 250px;
+    font-weight: 500;
+}
+
+.table td:nth-child(2), /* TICKET ID */
+.table th:nth-child(2) {
+    min-width: 120px;
+    text-align: center;
+}
+
+.table td:nth-child(3), /* CONTACTS */
+.table th:nth-child(3) {
+    min-width: 200px;
+}
+
+.table td:nth-child(4), /* STATUS */
+.table th:nth-child(4) {
+    min-width: 150px;
+}
+
+.table td:nth-child(5), /* CREATE DATE */
+.table td:nth-child(6), /* LAST ACTIVITY */
+.table td:nth-child(7), /* LAST REPLY */
+.table th:nth-child(5),
+.table th:nth-child(6),
+.table th:nth-child(7) {
+    min-width: 180px;
+    font-size: 0.85rem;
+}
+
+.table td:nth-child(8), /* PRIORITY */
+.table th:nth-child(8) {
+    min-width: 100px;
+    text-align: center;
+}
+
+.table td:nth-child(9), /* OWNER */
+.table th:nth-child(9) {
+    min-width: 200px;
+}
+
+/* Results card styling */
+.fade-in .card-body {
+    padding: 0 !important;
+}
+
+/* Improve card spacing */
+.glass-card.fade-in {
+    margin-bottom: 2rem;
+}
+
+/* Better responsive behavior */
+@media (max-width: 1200px) {
+    #resultsTable {
+        min-width: 1000px;
+    }
+    
+    .table th, 
+    .table td {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    #resultsTable {
+        min-width: 800px;
+    }
+    
+    .table th, 
+    .table td {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
 }
 
 /* Card Body Padding */

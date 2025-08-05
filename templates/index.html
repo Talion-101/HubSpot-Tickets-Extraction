@@ -92,18 +92,12 @@ Payment Failure | TK-002 | jane.smith@example.com | In Progress | 2025-07-29 | 2
                             Parsed Tickets ({{ data|length }} records)
                         </h3>
                         
-                        <div class="d-flex gap-2">
-                            <button id="copyTableBtn" class="btn btn-outline-light" onclick="copyTableToClipboard()">
-                                <i class="fas fa-copy me-2"></i>
-                                Copy Table
-                            </button>
-                            {% if show_download %}
-                            <a href="{{ url_for('download_excel') }}" class="btn btn-success">
-                                <i class="fas fa-download me-2"></i>
-                                Download Excel
-                            </a>
-                            {% endif %}
-                        </div>
+                        {% if show_download %}
+                        <a href="{{ url_for('download_excel') }}" class="btn btn-success">
+                            <i class="fas fa-download me-2"></i>
+                            Download Excel
+                        </a>
+                        {% endif %}
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -111,7 +105,7 @@ Payment Failure | TK-002 | jane.smith@example.com | In Progress | 2025-07-29 | 2
                                 <thead class="table-primary">
                                     <tr>
                                         {% for header in data[0].keys() %}
-                                        <th scope="col" class="text-nowrap">{{ header }}</th>
+                                        <th scope="col">{{ header }}</th>
                                         {% endfor %}
                                     </tr>
                                 </thead>
@@ -204,66 +198,6 @@ Payment Failure | TK-002 | jane.smith@example.com | In Progress | 2025-07-29 | 2
             }
         });
         {% endif %}
-
-        // Copy table to clipboard function
-        function copyTableToClipboard() {
-            const table = document.getElementById('resultsTable');
-            const copyBtn = document.getElementById('copyTableBtn');
-            
-            if (!table) return;
-            
-            // Create a text representation of the table
-            let text = '';
-            const headers = table.querySelectorAll('thead th');
-            const rows = table.querySelectorAll('tbody tr');
-            
-            // Add headers
-            const headerTexts = Array.from(headers).map(th => th.textContent.trim());
-            text += headerTexts.join('\t') + '\n';
-            
-            // Add data rows
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                const cellTexts = Array.from(cells).map(td => td.textContent.trim());
-                text += cellTexts.join('\t') + '\n';
-            });
-            
-            // Copy to clipboard
-            navigator.clipboard.writeText(text).then(() => {
-                // Show success feedback
-                const originalHTML = copyBtn.innerHTML;
-                copyBtn.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
-                copyBtn.classList.remove('btn-outline-light');
-                copyBtn.classList.add('btn-success');
-                
-                setTimeout(() => {
-                    copyBtn.innerHTML = originalHTML;
-                    copyBtn.classList.remove('btn-success');
-                    copyBtn.classList.add('btn-outline-light');
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                
-                // Show success feedback
-                const originalHTML = copyBtn.innerHTML;
-                copyBtn.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
-                copyBtn.classList.remove('btn-outline-light');
-                copyBtn.classList.add('btn-success');
-                
-                setTimeout(() => {
-                    copyBtn.innerHTML = originalHTML;
-                    copyBtn.classList.remove('btn-success');
-                    copyBtn.classList.add('btn-outline-light');
-                }, 2000);
-            });
-        }
     </script>
 </body>
 </html>
