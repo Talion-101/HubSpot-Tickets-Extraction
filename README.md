@@ -13,16 +13,16 @@ A Flask web application that parses raw HubSpot ticket data into structured tabl
 
 ## Input Format
 
-The app expects raw ticket data with exactly 8 fields per line:
+The app expects raw ticket data with exactly 9 fields per line:
 
 ```
-TICKET NAME | TICKET - CONTACTS | TICKET STATUS | CREATE DATE | LAST ACTIVITY DATE | LAST CUSTOMER REPLY DATE | PRIORITY | TICKET OWNER
+TICKET ID | TICKET NAME | TICKET - CONTACTS | TICKET STATUS | CREATE DATE | LAST ACTIVITY DATE | LAST CUSTOMER REPLY DATE | PRIORITY | TICKET OWNER
 ```
 
 ### Example Input:
 ```
-Login Issue | john.doe@example.com | Open | 2025-08-01 | 2025-08-04 | 2025-08-03 | High | Alice
-Payment Failure | jane.smith@example.com | In Progress | 2025-07-29 | 2025-08-02 | 2025-08-01 | Medium | Bob
+TK-001 | Login Issue | john.doe@example.com | Open | 2025-08-01 | 2025-08-04 | 2025-08-03 | High | Alice
+TK-002 | Payment Failure | jane.smith@example.com | In Progress | 2025-07-29 | 2025-08-02 | 2025-08-01 | Medium | Bob
 ```
 
 ### Supported Delimiters:
@@ -120,7 +120,7 @@ hubspot-ticket-parser/
 - Automatic cleanup when session expires
 
 ### Error Handling
-- Validates exactly 8 fields per row
+- Validates exactly 9 fields per row
 - Shows specific error messages for invalid data
 - Graceful handling of mixed delimiters
 - Empty line filtering
@@ -158,13 +158,13 @@ Test with various data formats:
 
 ```bash
 # Normal case
-Login Issue | user@email.com | Open | 2025-08-01 | 2025-08-04 | 2025-08-03 | High | Alice
+TK-001 | Login Issue | user@email.com | Open | 2025-08-01 | 2025-08-04 | 2025-08-03 | High | Alice
 
 # Tab delimited
-Login Issue	user@email.com	Open	2025-08-01	2025-08-04	2025-08-03	High	Alice
+TK-002	Login Issue	user@email.com	Open	2025-08-01	2025-08-04	2025-08-03	High	Alice
 
 # Error case (wrong field count)
-Login Issue | user@email.com | Open | 2025-08-01 | High
+TK-003 | Login Issue | user@email.com | Open | 2025-08-01 | High
 ```
 
 ## License

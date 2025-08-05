@@ -7,6 +7,7 @@ import re
 
 # Fixed headers for HubSpot tickets
 HEADERS = [
+    'TICKET ID',
     'TICKET NAME',
     'TICKET - CONTACTS', 
     'TICKET STATUS',
@@ -52,9 +53,9 @@ def parse_ticket_data(raw_data):
             # If no delimiters found, treat as single value (error case)
             values = [line.strip()]
         
-        # Validate that we have exactly 8 values
-        if len(values) != 8:
-            errors.append(f'Line {line_num}: Expected 8 values, got {len(values)} - "{line[:50]}{"..." if len(line) > 50 else ""}"')
+        # Validate that we have exactly 9 values
+        if len(values) != 9:
+            errors.append(f'Line {line_num}: Expected 9 values, got {len(values)} - "{line[:50]}{"..." if len(line) > 50 else ""}"')
             continue
         
         # Create dictionary mapping headers to values
@@ -83,7 +84,7 @@ def validate_ticket_data(data):
         return errors
     
     # Check for required fields
-    required_fields = ['TICKET NAME', 'TICKET STATUS']
+    required_fields = ['TICKET ID', 'TICKET NAME', 'TICKET STATUS']
     
     for i, ticket in enumerate(data, 1):
         for field in required_fields:

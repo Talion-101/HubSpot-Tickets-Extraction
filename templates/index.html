@@ -49,7 +49,7 @@
                         <form method="POST" action="{{ url_for('parse_tickets') }}">
                             <div class="mb-4">
                                 <label for="ticket_data" class="form-label">
-                                    Raw Ticket Data (8 fields per line, separated by | or tab)
+                                    Raw Ticket Data (9 fields per line, separated by | or tab)
                                 </label>
                                 <textarea 
                                     class="form-control" 
@@ -57,12 +57,12 @@
                                     name="ticket_data" 
                                     rows="10" 
                                     placeholder="Example:
-Login Issue | john.doe@example.com | Open | 2025-08-01 | 2025-08-04 | 2025-08-03 | High | Alice
-Payment Failure | jane.smith@example.com | In Progress | 2025-07-29 | 2025-08-02 | 2025-08-01 | Medium | Bob"
+TK-001 | Login Issue | john.doe@example.com | Open | 2025-08-01 | 2025-08-04 | 2025-08-03 | High | Alice
+TK-002 | Payment Failure | jane.smith@example.com | In Progress | 2025-07-29 | 2025-08-02 | 2025-08-01 | Medium | Bob"
                                     required
                                 ></textarea>
                                 <div class="form-text">
-                                    Expected format: TICKET NAME | CONTACTS | STATUS | CREATE DATE | LAST ACTIVITY | LAST REPLY | PRIORITY | OWNER
+                                    Expected format: TICKET ID | TICKET NAME | CONTACTS | STATUS | CREATE DATE | LAST ACTIVITY | LAST REPLY | PRIORITY | OWNER
                                 </div>
                             </div>
                             
@@ -139,7 +139,7 @@ Payment Failure | jane.smith@example.com | In Progress | 2025-07-29 | 2025-08-02
                                 <h5><i class="fas fa-clipboard-list me-2"></i>Input Format</h5>
                                 <ul class="list-unstyled">
                                     <li><i class="fas fa-check text-success me-2"></i>One ticket per line</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>8 fields separated by | or tab</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>9 fields separated by | or tab</li>
                                     <li><i class="fas fa-check text-success me-2"></i>No headers needed</li>
                                     <li><i class="fas fa-check text-success me-2"></i>Empty lines are ignored</li>
                                 </ul>

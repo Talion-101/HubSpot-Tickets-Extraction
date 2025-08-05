@@ -16,8 +16,8 @@ def test_parser():
     print("🧪 Testing Parser...")
     
     # Test case 1: Valid pipe-separated data
-    test_data1 = """Login Issue | john.doe@example.com | Open | 2025-08-01 | 2025-08-04 | 2025-08-03 | High | Alice
-Payment Failure | jane.smith@example.com | In Progress | 2025-07-29 | 2025-08-02 | 2025-08-01 | Medium | Bob"""
+    test_data1 = """TK-001 | Login Issue | john.doe@example.com | Open | 2025-08-01 | 2025-08-04 | 2025-08-03 | High | Alice
+TK-002 | Payment Failure | jane.smith@example.com | In Progress | 2025-07-29 | 2025-08-02 | 2025-08-01 | Medium | Bob"""
     
     result1, errors1 = parse_ticket_data(test_data1)
     assert len(result1) == 2, f"Expected 2 tickets, got {len(result1)}"
@@ -25,14 +25,14 @@ Payment Failure | jane.smith@example.com | In Progress | 2025-07-29 | 2025-08-02
     print("  ✅ Pipe-separated data parsing works")
     
     # Test case 2: Tab-separated data
-    test_data2 = "Login Issue\tjohn.doe@example.com\tOpen\t2025-08-01\t2025-08-04\t2025-08-03\tHigh\tAlice"
+    test_data2 = "TK-003\tLogin Issue\tjohn.doe@example.com\tOpen\t2025-08-01\t2025-08-04\t2025-08-03\tHigh\tAlice"
     result2, errors2 = parse_ticket_data(test_data2)
     assert len(result2) == 1, f"Expected 1 ticket, got {len(result2)}"
     assert len(errors2) == 0, f"Expected no errors, got {errors2}"
     print("  ✅ Tab-separated data parsing works")
     
     # Test case 3: Invalid data (wrong number of fields)
-    test_data3 = "Login Issue | john.doe@example.com | Open"
+    test_data3 = "TK-004 | Login Issue | john.doe@example.com | Open"
     result3, errors3 = parse_ticket_data(test_data3)
     assert len(result3) == 0, f"Expected 0 tickets, got {len(result3)}"
     assert len(errors3) > 0, f"Expected errors, got none"
@@ -77,6 +77,7 @@ def test_headers():
     
     from utils.parser import HEADERS
     expected_headers = [
+        'TICKET ID',
         'TICKET NAME',
         'TICKET - CONTACTS', 
         'TICKET STATUS',
