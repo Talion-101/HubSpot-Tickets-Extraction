@@ -8,6 +8,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 
+# Import the fixed headers to ensure correct order
+from .parser import HEADERS
+
 def create_excel_file(data):
     """
     Create an Excel file in memory from parsed ticket data
@@ -26,8 +29,8 @@ def create_excel_file(data):
     ws = wb.active
     ws.title = "HubSpot Tickets"
     
-    # Get headers from first data row
-    headers = list(data[0].keys())
+    # Use the fixed headers from parser to ensure correct order
+    headers = HEADERS
     
     # Style for headers
     header_font = Font(bold=True, color="FFFFFF")
