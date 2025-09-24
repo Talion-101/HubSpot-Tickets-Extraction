@@ -4,325 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HubSpot Ticket Parser | Premium Dark Edition</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { background: #181a20; color: #e0e0e0; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; }
+        .container { max-width: 700px; margin: 40px auto; background: #23272f; border-radius: 14px; box-shadow: 0 4px 32px #111; padding: 32px 28px; }
+        h1 { font-size: 2.3rem; margin-bottom: 8px; color: #e0e0e0; letter-spacing: 1px; }
+        .subtitle { color: #b0b8c1; margin-bottom: 24px; font-size: 1.08rem; }
+        .form-group { margin-bottom: 18px; }
+        label { font-weight: 600; display: block; margin-bottom: 6px; color: #e0e0e0; }
+        textarea { width: 100%; min-height: 180px; resize: vertical; padding: 12px; font-size: 1rem; border-radius: 8px; border: 1px solid #444; background: #23272f; color: #e0e0e0; transition: border 0.2s; }
+        textarea:focus { border: 1.5px solid #1976d2; outline: none; }
+        .btn { background: #1976d2; color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-size: 1rem; cursor: pointer; margin-right: 8px; font-weight: 500; box-shadow: 0 2px 8px #111; transition: background 0.2s; }
+        .btn:hover { background: #1560b2; }
+        .btn-secondary { background: #333; color: #e0e0e0; border: 1px solid #444; border-radius: 8px; }
+        .btn-secondary:hover { background: #222; }
+        .alert { background: #2d2f36; color: #ff6b6b; border-radius: 8px; padding: 10px 16px; margin-bottom: 18px; border: 1px solid #444; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; background: #23272f; color: #e0e0e0; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #444; padding: 10px; text-align: left; font-size: 0.98rem; }
+        th { background: #23272f; color: #e0e0e0; font-weight: 600; }
+        td { background: #23272f; color: #e0e0e0; }
+        .priority-stats { display: flex; gap: 16px; margin: 16px 0; }
+        .priority-stat { background: #333; border-radius: 8px; padding: 8px 14px; font-size: 0.95rem; color: #fff; font-weight: 500; box-shadow: 0 2px 8px #111; }
+        .priority-stat-light { color: #e0e0e0; }
+        .footer { text-align: center; color: #888; margin-top: 32px; font-size: 0.95rem; }
+        ul { margin: 10px 0 0 18px; color: #b0b8c1; }
+        @media (max-width: 800px) { .container { max-width: 98vw; padding: 18px 6vw; } }
+        @media (max-width: 500px) { h1 { font-size: 1.3rem; } .container { padding: 8px 2vw; } }
+    </style>
 </head>
 <body>
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <div class="container">
-            <div class="main-header bounce-in">
-                <h1 class="main-title">
-                    <i class="fas fa-bolt me-3"></i>
-                    HubSpot Parser
-                </h1>
-                <p class="main-subtitle">
-                    Transform your HubSpot ticket data with cutting-edge technology
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div class="container-fluid">
-        <div class="row justify-content-center">
-            <div class="col-12 col-lg-10 col-xl-9">
+    <div class="container">
+        <h1>HubSpot Ticket Parser</h1>
+        <div class="subtitle">Paste your HubSpot ticket data below and export to Excel</div>
                 
-                <!-- Flash Messages -->
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ 'danger-premium' if category == 'error' else 'premium' }} alert-dismissible fade show fade-in-up" role="alert">
-                                <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' }} me-2"></i>
-                                {{ message }}
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
-                            </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('parse_tickets') }}">
+            <div class="form-group">
+                <label for="ticket_data">Raw Ticket Data</label>
+                <textarea id="ticket_data" name="ticket_data" required placeholder="Paste your HubSpot ticket data here..."></textarea>
+            </div>
+            <button type="submit" class="btn">Transform Data</button>
+            {% if data %}
+                <a href="{{ url_for('clear_data') }}" class="btn btn-secondary">Reset</a>
+            {% endif %}
+        </form>
+
+        {% if data %}
+            <h2>Processed Results</h2>
+            <div>{{ data|length }} tickets successfully parsed</div>
+            {% if show_download %}
+                <a href="{{ url_for('download_excel') }}" class="btn">Export Excel</a>
+            {% endif %}
+            {% if priority_stats %}
+                <div class="priority-stats">
+                    {% for stat in priority_stats %}
+                        <div class="priority-stat priority-stat-light" style="background: {{ stat.color }}; color: #fff;">
+                            {{ stat.name }}: {{ stat.count }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <table>
+                <thead>
+                    <tr>
+                        {% for header in data[0].keys() %}
+                            <th>{{ header }}</th>
                         {% endfor %}
-                    {% endif %}
-                {% endwith %}
-
-                <!-- Input Form -->
-                <div class="premium-card mb-5 fade-in-up">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-4">
-                            <div class="me-3">
-                                <i class="fas fa-paste fa-2x" style="color: #00f5ff;"></i>
-                            </div>
-                            <div>
-                                <h3 class="mb-1" style="color: white; font-weight: 700;">Data Input Portal</h3>
-                                <p class="mb-0" style="color: #b8b8d1;">Paste your HubSpot ticket data below</p>
-                            </div>
-                        </div>
-                        
-                        <form method="POST" action="{{ url_for('parse_tickets') }}">
-                            <div class="form-group">
-                                <label for="ticket_data" class="form-label">
-                                    <i class="fas fa-database me-2"></i>
-                                    Raw Ticket Data
-                                </label>
-                                <textarea 
-                                    class="form-control" 
-                                    id="ticket_data" 
-                                    name="ticket_data" 
-                                    rows="12" 
-                                    placeholder="✨ Paste your HubSpot ticket data here...
-
-Example formats supported:
-• New HubSpot format (line-by-line with Preview)
-• Legacy format (pipe or tab separated)
-
-The system will automatically detect and process your data format."
-                                    required
-                                ></textarea>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Supports both new HubSpot copy format and legacy delimited formats
-                                </div>
-                            </div>
-                            
-                            <div class="d-flex gap-3 align-items-center">
-                                <button type="submit" class="btn btn-premium btn-lg">
-                                    <i class="fas fa-magic me-2"></i>
-                                    Transform Data
-                                </button>
-                                
-                                {% if data %}
-                                    <a href="{{ url_for('clear_data') }}" class="btn btn-secondary-premium btn-lg">
-                                        <i class="fas fa-refresh me-2"></i>
-                                        Reset
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Results Table -->
-                {% if data %}
-                <div class="premium-card fade-in-up">
-                    <div class="table-header d-flex justify-content-between align-items-center">
-                        <div>
-                            <h3 class="table-title">
-                                <i class="fas fa-chart-line me-2"></i>
-                                Processed Results
-                            </h3>
-                            <p class="mb-0" style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
-                                {{ data|length }} tickets successfully parsed
-                            </p>
-                        </div>
-                        
-                        {% if show_download %}
-                        <a href="{{ url_for('download_excel') }}" class="btn btn-success-premium">
-                            <i class="fas fa-download me-2"></i>
-                            Export Excel
-                        </a>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Priority Statistics Section -->
-                    {% if priority_stats %}
-                    <div class="priority-stats-section">
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-chart-pie me-2" style="color: #00f5ff; font-size: 1.2rem;"></i>
-                            <h5 class="mb-0" style="color: white; font-weight: 600;">Priority Breakdown</h5>
-                        </div>
-                        <div class="priority-stats-grid">
-                            {% for stat in priority_stats %}
-                            <div class="priority-stat-card">
-                                <div class="priority-badge" style="background: {{ stat.color }};">
-                                    {{ stat.count }}
-                                </div>
-                                <div class="priority-label" style="color: {{ stat.color }};">
-                                    {{ stat.name }}
-                                </div>
-                            </div>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in data %}
+                        <tr>
+                            {% for value in ticket.values() %}
+                                <td>{{ value }}</td>
                             {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="table-responsive">
-                        <table id="resultsTable" class="table mb-0">
-                            <thead>
-                                <tr>
-                                    {% for header in data[0].keys() %}
-                                    <th scope="col">{{ header }}</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for ticket in data %}
-                                <tr>
-                                    {% for value in ticket.values() %}
-                                    <td>{{ value }}</td>
-                                    {% endfor %}
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
 
-                <!-- Instructions -->
-                {% if not data %}
-                <div class="premium-card instructions-card fade-in-up">
-                    <div class="card-body p-4">
-                        <div class="text-center mb-4">
-                            <i class="fas fa-lightbulb fa-3x mb-3" style="color: #00f5ff;"></i>
-                            <h4 class="instructions-header">How It Works</h4>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5 class="instructions-header">
-                                    <i class="fas fa-upload instruction-icon"></i>
-                                    Input Formats
-                                </h5>
-                                <div class="instruction-item">
-                                    <i class="fas fa-check instruction-icon"></i>
-                                    New HubSpot format (line-by-line)
-                                </div>
-                                <div class="instruction-item">
-                                    <i class="fas fa-check instruction-icon"></i>
-                                    Legacy pipe/tab separated
-                                </div>
-                                <div class="instruction-item">
-                                    <i class="fas fa-check instruction-icon"></i>
-                                    Automatic format detection
-                                </div>
-                                <div class="instruction-item">
-                                    <i class="fas fa-check instruction-icon"></i>
-                                    Handles blank lines & Preview text
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h5 class="instructions-header">
-                                    <i class="fas fa-magic instruction-icon"></i>
-                                    Output Features
-                                </h5>
-                                <div class="instruction-item">
-                                    <i class="fas fa-check instruction-icon"></i>
-                                    Interactive HTML table
-                                </div>
-                                <div class="instruction-item">
-                                    <i class="fas fa-check instruction-icon"></i>
-                                    Professional Excel export
-                                </div>
-                                <div class="instruction-item">
-                                    <i class="fas fa-check instruction-icon"></i>
-                                    Formatted & styled output
-                                </div>
-                                <div class="instruction-item">
-                                    <i class="fas fa-check instruction-icon"></i>
-                                    100% memory-based processing
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="text-center mt-4 p-3" style="background: rgba(0, 245, 255, 0.1); border-radius: 12px; border: 1px solid rgba(0, 245, 255, 0.2);">
-                            <i class="fas fa-shield-alt me-2" style="color: #00f5ff;"></i>
-                            <span style="color: white; font-weight: 500;">Your data is processed securely in memory and never stored on our servers</span>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
+        {% if not data %}
+            <div style="margin: 24px 0; color: #555;">
+                <strong>How It Works:</strong><br>
+                <ul>
+                    <li>Paste HubSpot ticket data (supports new and legacy formats)</li>
+                    <li>Click Transform Data to parse and view results</li>
+                    <li>Export to Excel for further analysis</li>
+                </ul>
+                <div style="font-size: 0.95rem; color: #888; margin-top: 10px;">Your data is processed securely in memory and never stored.</div>
+            </div>
+        {% endif %}
 
-                <!-- Footer -->
-                <div class="footer-text">
-                    <i class="fas fa-heart me-1" style="color: #f093fb;"></i>
-                    Crafted with precision for HubSpot professionals
-                </div>
+        <div class="footer">Crafted for HubSpot professionals</div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Enhanced JavaScript -->
     <script>
-        // Auto-resize textarea with smooth animation
+        // Minimal auto-resize for textarea
         const textarea = document.getElementById('ticket_data');
         if (textarea) {
             textarea.addEventListener('input', function() {
                 this.style.height = 'auto';
-                this.style.height = Math.max(300, this.scrollHeight) + 'px';
-            });
-            
-            // Add focus effects
-            textarea.addEventListener('focus', function() {
-                this.style.transform = 'scale(1.01)';
-            });
-            
-            textarea.addEventListener('blur', function() {
-                this.style.transform = 'scale(1)';
+                this.style.height = Math.max(180, this.scrollHeight) + 'px';
             });
         }
-
-        // Enhanced form submission with loading state
-        document.querySelector('form').addEventListener('submit', function() {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalHTML = submitBtn.innerHTML;
-            
-            submitBtn.innerHTML = '<span class="loading-spinner me-2"></span>Processing Magic...';
-            submitBtn.disabled = true;
-            
-            // Add visual feedback
-            submitBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-            submitBtn.style.transform = 'scale(0.98)';
-        });
-
-        // Smooth scroll to results with enhanced animation
-        {% if data %}
-        document.addEventListener('DOMContentLoaded', function() {
-            const resultsCard = document.querySelector('.fade-in-up:last-of-type');
-            if (resultsCard) {
-                setTimeout(() => {
-                    resultsCard.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start',
-                        inline: 'nearest'
-                    });
-                }, 300);
-            }
-        });
-        {% endif %}
-
-        // Add hover effects to table rows
-        document.addEventListener('DOMContentLoaded', function() {
-            const tableRows = document.querySelectorAll('#resultsTable tbody tr');
-            tableRows.forEach(row => {
-                row.addEventListener('mouseenter', function() {
-                    this.style.transform = 'scale(1.01)';
-                    this.style.zIndex = '10';
-                });
-                
-                row.addEventListener('mouseleave', function() {
-                    this.style.transform = 'scale(1)';
-                    this.style.zIndex = 'auto';
-                });
-            });
-        });
-
-        // Add typing effect to placeholder (optional enhancement)
-        {% if not data %}
-        if (textarea) {
-            const placeholderText = textarea.placeholder;
-            textarea.placeholder = '';
-            let i = 0;
-            
-            const typeWriter = () => {
-                if (i < placeholderText.length) {
-                    textarea.placeholder += placeholderText.charAt(i);
-                    i++;
-                    setTimeout(typeWriter, 20);
-                }
-            };
-            
-            setTimeout(typeWriter, 1000);
-        }
-        {% endif %}
     </script>
 </body>
 </html>
